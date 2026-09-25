@@ -1,3 +1,65 @@
+
+// ==========================================
+// ÇOKLU DİL DESTEĞİ (TR / EN i18n)
+// ==========================================
+let currentLang = localStorage.getItem('os_lang') || 'tr';
+
+const TRANSLATIONS = {
+  tr: {
+    langBtn: '🌐 EN',
+    startBtn: 'Başlat',
+    userStatus: 'CyberOS v2.4 Çevrimiçi',
+    restartBtn: '🔄 Yeniden Başlat',
+    apps: {
+      terminal: 'Hacker Terminal (Bash)',
+      notepad: 'Not Defteri',
+      calc: 'Hesap Makinesi',
+      paint: 'CyberPaint Studio',
+      readme_txt: 'paketler.txt',
+      settings: 'Masaüstü Ayarları'
+    }
+  },
+  en: {
+    langBtn: '🌐 TR',
+    startBtn: 'Start',
+    userStatus: 'CyberOS v2.4 Online',
+    restartBtn: '🔄 Restart System',
+    apps: {
+      terminal: 'Terminal (Bash)',
+      notepad: 'Notepad',
+      calc: 'Calculator',
+      paint: 'CyberPaint Studio',
+      readme_txt: 'packages.txt',
+      settings: 'Settings'
+    }
+  }
+};
+
+function applyLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('os_lang', lang);
+  const t = TRANSLATIONS[lang];
+
+  const lBtn = document.getElementById('btn-lang');
+  if (lBtn) lBtn.textContent = t.langBtn;
+
+  const sText = document.querySelector('#start-btn span:last-child');
+  if (sText) sText.textContent = t.startBtn;
+
+  const uStat = document.querySelector('.user-status');
+  if (uStat) uStat.textContent = t.userStatus;
+
+  const rBtn = document.getElementById('btn-restart');
+  if (rBtn) rBtn.textContent = t.restartBtn;
+
+  // Masaüstü ve başlat menüsü etiketleri
+  document.querySelectorAll('.desktop-icon').forEach(icon => {
+    const appId = icon.dataset.app;
+    const label = icon.querySelector('.icon-label');
+    if (label && t.apps[appId]) label.textContent = t.apps[appId];
+  });
+}
+
 /**
  * CyberOS - Window Manager & Linux Desktop Environment
  */
@@ -295,17 +357,17 @@ function initTerminalApp(container) {
   const vfs = {
     '/': { type: 'dir', children: ['home', 'bin', 'etc', 'var'] },
     '/home': { type: 'dir', children: ['user'] },
-    '/home/user': { 
-      type: 'dir', 
-      children: ['Masaustu', 'Belgeler', 'Projeler', 'not.txt', '.bashrc'] 
+    '/home/user': {
+      type: 'dir',
+      children: ['Masaustu', 'Belgeler', 'Projeler', 'not.txt', '.bashrc']
     },
-    '/home/user/not.txt': { 
-      type: 'file', 
-      content: 'CyberOS Linux v6.8.0-generic\nBu sanal bir Linux bash terminalidir.' 
+    '/home/user/not.txt': {
+      type: 'file',
+      content: 'CyberOS Linux v6.8.0-generic\nBu sanal bir Linux bash terminalidir.'
     },
-    '/home/user/.bashrc': { 
-      type: 'file', 
-      content: 'export PS1="\\u@\\h:\\w\\$ "\nalias ll="ls -la"' 
+    '/home/user/.bashrc': {
+      type: 'file',
+      content: 'export PS1="\\u@\\h:\\w\\$ "\nalias ll="ls -la"'
     },
     '/home/user/Belgeler': { type: 'dir', children: ['ornek.txt'] },
     '/home/user/Belgeler/ornek.txt': { type: 'file', content: 'CyberOS sanal belge ornegi.' },
@@ -313,9 +375,9 @@ function initTerminalApp(container) {
     '/home/user/Masaustu/paketler.txt': { type: 'file', content: PAKETLER_TXT },
     '/home/user/Projeler': { type: 'dir', children: ['pixel-studio', 'sandbox-web'] },
     '/etc': { type: 'dir', children: ['os-release', 'hostname'] },
-    '/etc/os-release': { 
-      type: 'file', 
-      content: 'NAME="CyberOS GNU/Linux"\nVERSION="24.04 LTS"\nID=cyberos\nPRETTY_NAME="CyberOS 24.04 LTS (Noble Numbat)"' 
+    '/etc/os-release': {
+      type: 'file',
+      content: 'NAME="CyberOS GNU/Linux"\nVERSION="24.04 LTS"\nID=cyberos\nPRETTY_NAME="CyberOS 24.04 LTS (Noble Numbat)"'
     },
     '/etc/hostname': { type: 'file', content: 'cyberos-desktop' },
     '/bin': { type: 'dir', children: ['ls', 'cat', 'pwd', 'cd', 'mkdir', 'touch', 'rm', 'echo', 'uname', 'neofetch', 'whoami', 'clear', 'sudo', 'date', 'apt'] },
@@ -538,7 +600,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
         }
       } else if (cmd === 'sudo' && args[1] !== 'apt') {
         output.textContent += '\n[sudo] password for user: \nuser is in the sudoers file. This incident will be reported.';
-      } 
+      }
       // --- APT PAKET YÖNETİCİSİ ---
       else if (cmd === 'apt' || (cmd === 'sudo' && args[1] === 'apt')) {
         const aptArgs = cmd === 'sudo' ? args.slice(2) : args.slice(1);
@@ -616,7 +678,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
         output.textContent += `\n
         #####        user@cyberos-desktop
        #######       ----------------------
-       ##O#O##       OS: CyberOS GNU/Linux 24.04 LTS x86_64
+       ##O#O##       OS: CyberOS GNU/Linux 31.31 LTS x86_64
        #VVVVV#       Host: WebAssembly Container
      ##  VVV  ##     Kernel: 6.8.0-31-generic
     #          ##    Uptime: 2 hours, 14 mins
@@ -912,3 +974,10 @@ function addAppToDesktop(appName) {
 
 // Varsayılan olarak başlangıçta Terminal'i aç
 openApp('terminal');
+applyLanguage(currentLang);
+const btnLang = document.getElementById('btn-lang');
+if (btnLang) {
+  btnLang.addEventListener('click', () => {
+    applyLanguage(currentLang === 'tr' ? 'en' : 'tr');
+  });
+}
