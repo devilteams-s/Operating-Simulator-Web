@@ -294,24 +294,24 @@ function initTerminalApp(container) {
   // Sanal Dosya Sistemi
   const vfs = {
     '/': { type: 'dir', children: ['home', 'bin', 'etc', 'var'] },
-    '/home': { type: 'dir', children: ['mehmet'] },
-    '/home/mehmet': { 
+    '/home': { type: 'dir', children: ['user'] },
+    '/home/user': { 
       type: 'dir', 
       children: ['Masaustu', 'Belgeler', 'Projeler', 'not.txt', '.bashrc'] 
     },
-    '/home/mehmet/not.txt': { 
+    '/home/user/not.txt': { 
       type: 'file', 
       content: 'CyberOS Linux v6.8.0-generic\nBu sanal bir Linux bash terminalidir.' 
     },
-    '/home/mehmet/.bashrc': { 
+    '/home/user/.bashrc': { 
       type: 'file', 
       content: 'export PS1="\\u@\\h:\\w\\$ "\nalias ll="ls -la"' 
     },
-    '/home/mehmet/Belgeler': { type: 'dir', children: ['sifreler.txt'] },
-    '/home/mehmet/Belgeler/sifreler.txt': { type: 'file', content: 'SECRET_VAULT_KEY: 9482-cyber-linux-pass' },
-    '/home/mehmet/Masaustu': { type: 'dir', children: ['paketler.txt'] },
-    '/home/mehmet/Masaustu/paketler.txt': { type: 'file', content: PAKETLER_TXT },
-    '/home/mehmet/Projeler': { type: 'dir', children: ['pixel-studio', 'sandbox-web'] },
+    '/home/user/Belgeler': { type: 'dir', children: ['ornek.txt'] },
+    '/home/user/Belgeler/ornek.txt': { type: 'file', content: 'CyberOS sanal belge ornegi.' },
+    '/home/user/Masaustu': { type: 'dir', children: ['paketler.txt'] },
+    '/home/user/Masaustu/paketler.txt': { type: 'file', content: PAKETLER_TXT },
+    '/home/user/Projeler': { type: 'dir', children: ['pixel-studio', 'sandbox-web'] },
     '/etc': { type: 'dir', children: ['os-release', 'hostname'] },
     '/etc/os-release': { 
       type: 'file', 
@@ -322,20 +322,20 @@ function initTerminalApp(container) {
     '/var': { type: 'dir', children: ['log'] }
   };
 
-  let currentPath = '/home/mehmet';
+  let currentPath = '/home/user';
   let history = [];
   let historyIdx = -1;
 
   function getPromptPath(p) {
-    if (p === '/home/mehmet') return '~';
-    if (p.startsWith('/home/mehmet/')) return '~' + p.slice('/home/mehmet'.length);
+    if (p === '/home/user') return '~';
+    if (p.startsWith('/home/user/')) return '~' + p.slice('/home/user'.length);
     return p;
   }
 
   function resolvePath(target) {
     if (!target || target === '.') return currentPath;
-    if (target === '~') return '/home/mehmet';
-    if (target.startsWith('~/')) return '/home/mehmet/' + target.slice(2);
+    if (target === '~') return '/home/user';
+    if (target.startsWith('~/')) return '/home/user/' + target.slice(2);
     if (target.startsWith('/')) {
       const parts = target.split('/').filter(Boolean);
       return '/' + parts.join('/');
@@ -365,7 +365,7 @@ Welcome to CyberOS Linux 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)
 Type 'help' to view available Linux bash commands.
 Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
       <div class="term-input-line">
-        <span class="term-prompt" id="term-prompt">mehmet@cyberos-desktop:~$ </span>
+        <span class="term-prompt" id="term-prompt">user@cyberos-desktop:~$ </span>
         <input type="text" class="term-input" id="term-input" autofocus autocomplete="off" spellcheck="false">
       </div>
     </div>
@@ -377,7 +377,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
   const termEl = container.querySelector('#term');
 
   function updatePrompt() {
-    promptEl.textContent = `mehmet@cyberos-desktop:${getPromptPath(currentPath)}$ `;
+    promptEl.textContent = `user@cyberos-desktop:${getPromptPath(currentPath)}$ `;
   }
 
   input.addEventListener('keydown', (e) => {
@@ -416,7 +416,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
 
     if (e.key === 'Enter') {
       const rawCmd = input.value.trim();
-      const promptText = `mehmet@cyberos-desktop:${getPromptPath(currentPath)}$ `;
+      const promptText = `user@cyberos-desktop:${getPromptPath(currentPath)}$ `;
       output.textContent += `\n${promptText}${rawCmd}`;
       input.value = '';
 
@@ -434,7 +434,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
       } else if (cmd === 'pwd') {
         output.textContent += `\n${currentPath}`;
       } else if (cmd === 'whoami') {
-        output.textContent += '\nmehmet';
+        output.textContent += '\nuser';
       } else if (cmd === 'hostname') {
         output.textContent += '\ncyberos-desktop';
       } else if (cmd === 'date') {
@@ -453,7 +453,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
             items.forEach(item => {
               const fullP = currentPath === '/' ? '/' + item : currentPath + '/' + item;
               const isD = vfs[fullP] && vfs[fullP].type === 'dir';
-              const perms = isD ? 'drwxr-xr-x 2 mehmet mehmet 4096' : '-rw-r--r-- 1 mehmet mehmet  248';
+              const perms = isD ? 'drwxr-xr-x 2 user user 4096' : '-rw-r--r-- 1 user user  248';
               output.textContent += `\n${perms} Sep 25 21:50 ${item}`;
             });
           } else {
@@ -537,7 +537,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
           output.textContent += `\n${text}`;
         }
       } else if (cmd === 'sudo' && args[1] !== 'apt') {
-        output.textContent += '\n[sudo] password for mehmet: \nmehmet is in the sudoers file. This incident will be reported.';
+        output.textContent += '\n[sudo] password for user: \nuser is in the sudoers file. This incident will be reported.';
       } 
       // --- APT PAKET YÖNETİCİSİ ---
       else if (cmd === 'apt' || (cmd === 'sudo' && args[1] === 'apt')) {
@@ -596,7 +596,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
         if (!installedApps.has('htop')) {
           output.textContent += "\nCommand 'htop' not found, but can be installed with:\nsudo apt install htop";
         } else {
-          output.textContent += `\n  CPU[|||||||||||||||||||||||        42.8%]   Tasks: 42, 1 thr; 1 running\n  Mem[|||||||||||||||               3.8/16.0G]   Load average: 0.18 0.12 0.08\n\n  PID USER      PRI  NI  VIRT   RES   SHR S CPU% MEM%   TIME+  Command\n    1 root       20   0 168.4M 12.1M  8.4M S  0.0  0.1  0:02.14 /sbin/init\n  842 mehmet     20   0  1.2G  320M   98M S 22.4  2.0  0:45.10 /bin/cyberos-wm\n 1204 mehmet     20   0  420M   86M   42M S  2.8  0.5  0:08.22 /bin/bash`;
+          output.textContent += `\n  CPU[|||||||||||||||||||||||        42.8%]   Tasks: 42, 1 thr; 1 running\n  Mem[|||||||||||||||               3.8/16.0G]   Load average: 0.18 0.12 0.08\n\n  PID USER      PRI  NI  VIRT   RES   SHR S CPU% MEM%   TIME+  Command\n    1 root       20   0 168.4M 12.1M  8.4M S  0.0  0.1  0:02.14 /sbin/init\n  842 user     20   0  1.2G  320M   98M S 22.4  2.0  0:45.10 /bin/cyberos-wm\n 1204 user     20   0  420M   86M   42M S  2.8  0.5  0:08.22 /bin/bash`;
         }
       } else if (cmd === 'tetris') {
         if (!installedApps.has('tetris')) {
@@ -614,7 +614,7 @@ Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
         }
       } else if (cmd === 'neofetch') {
         output.textContent += `\n
-        #####        mehmet@cyberos-desktop
+        #####        user@cyberos-desktop
        #######       ----------------------
        ##O#O##       OS: CyberOS GNU/Linux 24.04 LTS x86_64
        #VVVVV#       Host: WebAssembly Container
