@@ -238,11 +238,11 @@ function setupDrag(winEl) {
 }
 
 // Masaüstü ve Başlat İkon Tıklamaları
-document.querySelectorAll('.desktop-icon, .start-item').forEach(el => {
-  el.addEventListener('click', () => {
-    const appId = el.dataset.app;
-    if (appId) openApp(appId);
-  });
+document.addEventListener('click', (e) => {
+  const icon = e.target.closest('.desktop-icon') || e.target.closest('.start-item');
+  if (icon && icon.dataset.app) {
+    openApp(icon.dataset.app);
+  }
 });
 
 document.getElementById('btn-restart').addEventListener('click', () => {
