@@ -1,3 +1,4 @@
+let installedApps = new Set(['cmatrix', 'sl']);
 /**
  * CyberOS - Window Manager & Native Applications
  */
@@ -60,6 +61,27 @@ const APPS = {
     width: 500,
     height: 380,
     init: initPaintApp
+  },
+  readme_txt: {
+    title: 'paketler.txt - Paket Deposu Rehberi',
+    icon: '📄',
+    width: 480,
+    height: 380,
+    init: initReadmeApp
+  },
+  tetris: {
+    title: 'Tetris Arcade',
+    icon: '🕹️',
+    width: 320,
+    height: 440,
+    init: initTetrisApp
+  },
+  clock_app: {
+    title: 'Neon Saat',
+    icon: '⏰',
+    width: 300,
+    height: 180,
+    init: initClockApp
   },
   settings: {
     title: 'Masaüstü Ayarları',
@@ -252,7 +274,36 @@ function initTerminalApp(container) {
     },
     '/home/mehmet/Belgeler': { type: 'dir', children: ['sifreler.txt'] },
     '/home/mehmet/Belgeler/sifreler.txt': { type: 'file', content: 'SECRET_VAULT_KEY: 9482-cyber-linux-pass' },
-    '/home/mehmet/Masaustu': { type: 'dir', children: [] },
+    '/home/mehmet/Masaustu': { type: 'dir', children: ['paketler.txt'] },\n    '/home/mehmet/Masaustu/paketler.txt': { type: 'file', content: `=================================================
+📦 CYBEROS LINUX - APT DEPOSU PAKET LİSTESİ
+=================================================
+Terminali açıp 'sudo apt install <paket-adi>' 
+yazarak aşağıdaki uygulamaları kurabilirsiniz:
+
+1. cmatrix
+   Açıklama: Efsanevi yeşil Matrix dijital yağmur akışı!
+   Komut:    sudo apt install cmatrix
+
+2. sl
+   Açıklama: Terminal ekranından geçen nostaljik buharlı tren!
+   Komut:    sudo apt install sl
+
+3. htop
+   Açıklama: Etkileşimli dinamik CPU & RAM işlem yöneticisi.
+   Komut:    sudo apt install htop
+
+4. cowsay
+   Açıklama: Konuşan sevimli terminal ineği!
+   Komut:    sudo apt install cowsay
+
+5. tetris
+   Açıklama: Masaüstüne mini retro Tetris oyunu yükler!
+   Komut:    sudo apt install tetris
+
+6. clock
+   Açıklama: Büyük dijital neon masaüstü saati.
+   Komut:    sudo apt install clock
+=================================================` },
     '/home/mehmet/Projeler': { type: 'dir', children: ['pixel-studio', 'sandbox-web'] },
     '/etc': { type: 'dir', children: ['os-release', 'hostname'] },
     '/etc/os-release': { 
@@ -479,6 +530,82 @@ Type 'help' to view available Linux bash commands.</div>
         }
       } else if (cmd === 'sudo') {
         output.textContent += '\n[sudo] password for mehmet: \nmehmet is in the sudoers file. This incident will be reported.';
+      
+      // --- APT PAKET YÖNETİCİSİ ---
+      else if (cmd === 'apt' || (cmd === 'sudo' && args[1] === 'apt')) {
+        const aptArgs = cmd === 'sudo' ? args.slice(2) : args.slice(1);
+        const action = aptArgs[0];
+        const pkg = aptArgs[1];
+
+        if (!action) {
+          output.textContent += '\napt 2.7.14 (x86_64)\nUsage: apt [options] command\n\nCommands: install, update, list, remove';
+        } else if (action === 'update') {
+          output.textContent += '\nHit:1 http://archive.cyberos.org/ubuntu noble InRelease\nGet:2 http://security.cyberos.org/ubuntu noble-security InRelease [126 kB]\nReading package lists... Done\nBuilding dependency tree... Done\nAll packages are up to date.';
+        } else if (action === 'list') {
+          output.textContent += '\nListing available packages...\ncmatrix/noble 2.0-3 x86_64\nsl/noble 5.02-1 x86_64\nhtop/noble 3.3.0-4 x86_64\ncowsay/noble 3.7.0-1 all\ntetris/noble 1.0.0-1 x86_64\nclock/noble 2.1.0-1 x86_64';
+        } else if (action === 'install') {
+          if (!pkg) {
+            output.textContent += '\napt: missing package name operand. Example: sudo apt install cmatrix';
+          } else {
+            const validPkgs = ['cmatrix', 'sl', 'htop', 'cowsay', 'tetris', 'clock'];
+            if (!validPkgs.includes(pkg)) {
+              output.textContent += `\nE: Unable to locate package ${pkg}\nE: Check 'cat ~/Masaustu/paketler.txt' for valid packages.`;
+            } else if (installedApps.has(pkg)) {
+              output.textContent += `\n${pkg} is already the newest version.`;
+            } else {
+              output.textContent += `\nReading package lists... Done\nBuilding dependency tree... Done\nThe following NEW packages will be installed:\n  ${pkg}\n0 upgraded, 1 newly installed, 0 to remove.\nGet:1 http://archive.cyberos.org/ubuntu noble/main ${pkg} [428 kB]\nUnpacking ${pkg} (amd64)...\nSetting up ${pkg}...\nProcessing triggers for man-db...\n\n✨ SUCCESS: '${pkg}' has been installed!`;
+
+              installedApps.add(pkg);
+              vfs['/bin'].children.push(pkg);
+
+              // Masaüstüne ve Başlat Menüsüne yeni ikonu dinamik ekle
+              addAppToDesktop(pkg);
+            }
+          }
+        }
+      }
+      // --- KURULAN PAKETLERİ ÇALIŞTIRMA ---
+      else if (cmd === 'cmatrix') {
+        if (!installedApps.has('cmatrix')) {
+          output.textContent += "\nCommand 'cmatrix' not found, but can be installed with:\nsudo apt install cmatrix";
+        } else {
+          output.textContent += '\n01001000 01100001 01100011 01101011 01101001 01101110 01100111\n01000011 01111001 01100010 01100101 01110010 01001111 01010011\nWake up, Neo...\n[Matrix Stream Completed]';
+        }
+      } else if (cmd === 'sl') {
+        if (!installedApps.has('sl')) {
+          output.textContent += "\nCommand 'sl' not found, but can be installed with:\nsudo apt install sl";
+        } else {
+          output.textContent += '\n==== o o o o o o o . . . ____________________ _____\n  _D __|===|_D _| * * * * * * * * *| | | |\n |__/__|_____|__|__________________| |_|_|\n   oo---oo       ooo---ooo---ooo     o---o';
+        }
+      } else if (cmd === 'cowsay') {
+        if (!installedApps.has('cowsay')) {
+          output.textContent += "\nCommand 'cowsay' not found, but can be installed with:\nsudo apt install cowsay";
+        } else {
+          const msg = args.slice(1).join(' ') || 'Linux & CyberOS Harika!';
+          output.textContent += `\n  < ${msg} >\n         \\   ^__^\n          \\  (oo)\\_______\n             (__)\\       )\\/\\\n                 ||----w |\n                 ||     ||`;
+        }
+      } else if (cmd === 'htop') {
+        if (!installedApps.has('htop')) {
+          output.textContent += "\nCommand 'htop' not found, but can be installed with:\nsudo apt install htop";
+        } else {
+          output.textContent += `\n  CPU[|||||||||||||||||||||||        42.8%]   Tasks: 42, 1 thr; 1 running\n  Mem[|||||||||||||||               3.8/16.0G]   Load average: 0.18 0.12 0.08\n\n  PID USER      PRI  NI  VIRT   RES   SHR S CPU% MEM%   TIME+  Command\n    1 root       20   0 168.4M 12.1M  8.4M S  0.0  0.1  0:02.14 /sbin/init\n  842 mehmet     20   0  1.2G  320M   98M S 22.4  2.0  0:45.10 /bin/cyberos-wm\n 1204 mehmet     20   0  420M   86M   42M S  2.8  0.5  0:08.22 /bin/bash`;
+        }
+      } else if (cmd === 'tetris') {
+        if (!installedApps.has('tetris')) {
+          output.textContent += "\nCommand 'tetris' not found, but can be installed with:\nsudo apt install tetris";
+        } else {
+          openApp('tetris');
+          output.textContent += '\n[Tetris Arcade başlatıldı...]';
+        }
+      } else if (cmd === 'clock') {
+        if (!installedApps.has('clock')) {
+          output.textContent += "\nCommand 'clock' not found, but can be installed with:\nsudo apt install clock";
+        } else {
+          openApp('clock_app');
+          output.textContent += '\n[Neon Saat başlatıldı...]';
+        }
+      }
+
       } else if (cmd === 'neofetch') {
         output.textContent += `\n
         #####        mehmet@cyberos-desktop
@@ -683,3 +810,121 @@ function initSettingsApp(container) {
 
 // Varsayılan olarak başlangıçta Terminal'i aç
 openApp('terminal');
+
+// ==========================================
+// PAKETLER.TXT GÖRÜNTÜLEYİCİ
+// ==========================================
+function initReadmeApp(container) {
+  const content = `=================================================
+📦 CYBEROS LINUX - APT DEPOSU PAKET LİSTESİ
+=================================================
+Terminali açıp 'sudo apt install <paket-adi>' 
+yazarak aşağıdaki uygulamaları kurabilirsiniz:
+
+1. cmatrix
+   Açıklama: Efsanevi yeşil Matrix dijital yağmur akışı!
+   Komut:    sudo apt install cmatrix
+
+2. sl
+   Açıklama: Terminal ekranından geçen nostaljik buharlı tren!
+   Komut:    sudo apt install sl
+
+3. htop
+   Açıklama: Etkileşimli dinamik CPU & RAM işlem yöneticisi.
+   Komut:    sudo apt install htop
+
+4. cowsay
+   Açıklama: Konuşan sevimli terminal ineği!
+   Komut:    sudo apt install cowsay
+
+5. tetris
+   Açıklama: Masaüstüne mini retro Tetris oyunu yükler!
+   Komut:    sudo apt install tetris
+
+6. clock
+   Açıklama: Büyük dijital neon masaüstü saati.
+   Komut:    sudo apt install clock
+=================================================`;
+  container.innerHTML = `
+    <div style="height: 100%; display: flex; flex-direction: column; background: #181a26; color: #a29bfe; font-family: 'Fira Code', monospace; padding: 1rem; overflow-y: auto; font-size: 0.82rem; line-height: 1.5; white-space: pre-wrap; user-select: text;">${content}</div>
+  `;
+}
+
+// ==========================================
+// KURULAN UYGULAMALAR: TETRIS
+// ==========================================
+function initTetrisApp(container) {
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #0c0d14; color: #fff; gap: 10px;">
+      <div style="font-weight: 700; color: #ff4757; font-size: 1.1rem;">🕹️ Mini Tetris Arcade</div>
+      <canvas id="mini-tetris" width="160" height="240" style="background: #000; border: 2px solid #333;"></canvas>
+      <div style="font-size: 0.75rem; color: #888;">Yön Tuşları: Hareket | Yukarı: Döndür</div>
+    </div>
+  `;
+  const cvs = container.querySelector('#mini-tetris');
+  const tCtx = cvs.getContext('2d');
+  tCtx.fillStyle = '#6c5ce7';
+  tCtx.fillRect(40, 60, 80, 20);
+  tCtx.fillStyle = '#00d2d3';
+  tCtx.fillRect(60, 40, 20, 20);
+}
+
+// ==========================================
+// KURULAN UYGULAMALAR: NEON SAAT
+// ==========================================
+function initClockApp(container) {
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #090a10; color: #00d2d3; font-family: 'Fira Code', monospace;">
+      <div id="big-digital-clock" style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 0 20px #00d2d3;">00:00:00</div>
+      <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">CyberOS World Time</div>
+    </div>
+  `;
+  const cEl = container.querySelector('#big-digital-clock');
+  const timer = setInterval(() => {
+    if (!document.body.contains(cEl)) {
+      clearInterval(timer);
+      return;
+    }
+    const d = new Date();
+    cEl.textContent = d.toTimeString().split(' ')[0];
+  }, 1000);
+  const d = new Date();
+  cEl.textContent = d.toTimeString().split(' ')[0];
+}
+
+function addAppToDesktop(appName) {
+  const dtIcons = document.querySelector('.desktop-icons');
+  const startList = document.querySelector('.start-list');
+  const meta = {
+    cmatrix: { icon: '📟', name: 'cmatrix (CLI)' },
+    sl: { icon: '🚂', name: 'Steam Train' },
+    htop: { icon: '📊', name: 'htop Monitor' },
+    cowsay: { icon: '🐮', name: 'cowsay' },
+    tetris: { icon: '🕹️', name: 'Tetris Arcade' },
+    clock: { icon: '⏰', name: 'Neon Saat' }
+  }[appName];
+
+  if (!meta) return;
+
+  // Masaüstü ikonu
+  const iconDiv = document.createElement('div');
+  iconDiv.className = 'desktop-icon';
+  iconDiv.dataset.app = appName === 'clock' ? 'clock_app' : appName;
+  iconDiv.innerHTML = `<div class="icon-img">${meta.icon}</div><div class="icon-label">${meta.name}</div>`;
+  iconDiv.onclick = () => {
+    if (appName === 'tetris' || appName === 'clock') {
+      openApp(appName === 'clock' ? 'clock_app' : 'tetris');
+    } else {
+      openApp('terminal');
+    }
+  };
+  dtIcons.appendChild(iconDiv);
+
+  // Başlat Menüsü İkonu
+  const itemDiv = document.createElement('div');
+  itemDiv.className = 'start-item';
+  itemDiv.dataset.app = iconDiv.dataset.app;
+  itemDiv.innerHTML = `<span>${meta.icon}</span> ${meta.name}`;
+  itemDiv.onclick = iconDiv.onclick;
+  startList.appendChild(itemDiv);
+}
