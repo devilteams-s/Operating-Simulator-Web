@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberOS - Web Masaüstü İşletim Sistemi</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="desktop" class="desktop">
+    <!-- Masaüstü İkonları -->
+    <div class="desktop-icons">
+      <div class="desktop-icon" data-app="terminal">
+        <div class="icon-img">💻</div>
+        <div class="icon-label">Terminal</div>
+      </div>
+      <div class="desktop-icon" data-app="notepad">
+        <div class="icon-img">📝</div>
+        <div class="icon-label">Not Defteri</div>
+      </div>
+      <div class="desktop-icon" data-app="calc">
+        <div class="icon-img">🧮</div>
+        <div class="icon-label">Hesap Makinesi</div>
+      </div>
+      <div class="desktop-icon" data-app="paint">
+        <div class="icon-img">🎨</div>
+        <div class="icon-label">CyberPaint</div>
+      </div>
+      <div class="desktop-icon" data-app="settings">
+        <div class="icon-img">⚙️</div>
+        <div class="icon-label">Ayarlar</div>
+      </div>
+    </div>
+
+    <!-- Pencereler Konteyneri -->
+    <div id="windows-container"></div>
+
+    <!-- Başlat Menüsü Pop-up -->
+    <div id="start-menu" class="start-menu">
+      <div class="start-header">
+        <div class="user-avatar">🤖</div>
+        <div class="user-info">
+          <div class="user-name">Mehmet (Root)</div>
+          <div class="user-status">CyberOS v2.4 Online</div>
+        </div>
+      </div>
+      <div class="start-list">
+        <div class="start-item" data-app="terminal"><span>💻</span> Terminal</div>
+        <div class="start-item" data-app="notepad"><span>📝</span> Not Defteri</div>
+        <div class="start-item" data-app="calc"><span>🧮</span> Hesap Makinesi</div>
+        <div class="start-item" data-app="paint"><span>🎨</span> CyberPaint</div>
+        <div class="start-item" data-app="settings"><span>⚙️</span> Masaüstü Ayarları</div>
+      </div>
+      <div class="start-footer">
+        <button id="btn-restart" class="footer-btn">🔄 Yeniden Başlat</button>
+      </div>
+    </div>
+
+    <!-- Görev Çubuğu (Taskbar) -->
+    <footer class="taskbar">
+      <button id="start-btn" class="start-button">
+        <span class="start-icon">💠</span>
+        <span>Başlat</span>
+      </button>
+
+      <div id="taskbar-apps" class="taskbar-apps">
+        <!-- Açık pencerelerin sekmeleri buraya gelir -->
+      </div>
+
+      <div class="system-tray">
+        <span id="tray-wifi" title="Bağlantı: Güvenli">📶</span>
+        <span id="tray-vol" title="Ses: 100%">🔊</span>
+        <div id="clock" class="clock">12:00</div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="webos.js"></script>
+
+    <!-- Sağ Alt Köşe: Geliştirici İmzası -->
+    <a href="https://github.com/devilteams-s" target="_blank" rel="noopener noreferrer" class="creator-badge">
+      <span class="creator-dot"></span>
+      <span>made by <strong>@devilteams-s</strong></span>
+    </a>
+
+</body>
+</html>
