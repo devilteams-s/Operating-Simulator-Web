@@ -1,14 +1,47 @@
-let installedApps = new Set(['cmatrix', 'sl']);
 /**
- * CyberOS - Window Manager & Native Applications
+ * CyberOS - Window Manager & Linux Desktop Environment
  */
 
+let installedApps = new Set(['cmatrix', 'sl']);
 let highestZIndex = 100;
 const openWindows = new Map();
+
+// Paket Deposu Rehber Metni
+const PAKETLER_TXT = `=================================================
+📦 CYBEROS LINUX - APT DEPOSU PAKET LİSTESİ
+=================================================
+Terminali açıp 'sudo apt install <paket-adi>' 
+yazarak aşağıdaki uygulamaları kurabilirsiniz:
+
+1. cmatrix
+   Açıklama: Efsanevi yeşil Matrix dijital yağmur akışı!
+   Komut:    sudo apt install cmatrix
+
+2. sl
+   Açıklama: Terminal ekranından geçen nostaljik buharlı tren!
+   Komut:    sudo apt install sl
+
+3. htop
+   Açıklama: Etkileşimli dinamik CPU & RAM işlem yöneticisi.
+   Komut:    sudo apt install htop
+
+4. cowsay
+   Açıklama: Konuşan sevimli terminal ineği!
+   Komut:    sudo apt install cowsay
+
+5. tetris
+   Açıklama: Masaüstüne mini retro Tetris oyunu yükler!
+   Komut:    sudo apt install tetris
+
+6. clock
+   Açıklama: Büyük dijital neon masaüstü saati.
+   Komut:    sudo apt install clock
+=================================================`;
 
 // Saat Güncellemesi
 function updateClock() {
   const clockEl = document.getElementById('clock');
+  if (!clockEl) return;
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -21,24 +54,26 @@ updateClock();
 const startBtn = document.getElementById('start-btn');
 const startMenu = document.getElementById('start-menu');
 
-startBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  startMenu.classList.toggle('open');
-});
+if (startBtn && startMenu) {
+  startBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    startMenu.classList.toggle('open');
+  });
 
-document.addEventListener('click', (e) => {
-  if (!startMenu.contains(e.target) && e.target !== startBtn) {
-    startMenu.classList.remove('open');
-  }
-});
+  document.addEventListener('click', (e) => {
+    if (!startMenu.contains(e.target) && e.target !== startBtn) {
+      startMenu.classList.remove('open');
+    }
+  });
+}
 
 // Uygulama Tanımları ve İçerikleri
 const APPS = {
   terminal: {
     title: 'Hacker Terminal (Bash)',
     icon: '💻',
-    width: 520,
-    height: 340,
+    width: 540,
+    height: 360,
     init: initTerminalApp
   },
   notepad: {
@@ -65,8 +100,8 @@ const APPS = {
   readme_txt: {
     title: 'paketler.txt - Paket Deposu Rehberi',
     icon: '📄',
-    width: 480,
-    height: 380,
+    width: 500,
+    height: 400,
     init: initReadmeApp
   },
   tetris: {
@@ -94,7 +129,7 @@ const APPS = {
 
 // Pencere Oluşturma (Window Creator)
 function openApp(appId) {
-  startMenu.classList.remove('open');
+  if (startMenu) startMenu.classList.remove('open');
 
   if (openWindows.has(appId)) {
     const win = openWindows.get(appId);
@@ -104,7 +139,10 @@ function openApp(appId) {
   }
 
   const appDef = APPS[appId];
-  if (!appDef) return;
+  if (!appDef) {
+    console.error('Uygulama bulunamadı:', appId);
+    return;
+  }
 
   const winId = `win-${appId}`;
   const winEl = document.createElement('div');
@@ -114,7 +152,7 @@ function openApp(appId) {
   winEl.style.height = `${appDef.height}px`;
 
   // Masaüstünde ortala / hafif kaydır
-  const offset = openWindows.size * 25;
+  const offset = (openWindows.size % 8) * 25;
   const left = Math.max(20, Math.min(window.innerWidth - appDef.width - 20, 100 + offset));
   const top = Math.max(20, Math.min(window.innerHeight - appDef.height - 60, 60 + offset));
   winEl.style.left = `${left}px`;
@@ -138,7 +176,7 @@ function openApp(appId) {
 
   document.getElementById('windows-container').appendChild(winEl);
 
-  // Görev çubuğuna ekle
+  // Görev çubuğuna sekme ekle
   const taskTab = document.createElement('div');
   taskTab.className = 'taskbar-item active';
   taskTab.innerHTML = `<span>${appDef.icon}</span> <span>${appDef.title}</span>`;
@@ -157,7 +195,6 @@ function openApp(appId) {
   setupDrag(winEl);
 
   // Kontrol Butonları
-  const titlebar = winEl.querySelector('.window-titlebar');
   winEl.querySelector('.ctrl-btn.close').onclick = () => closeWindow(appId);
   winEl.querySelector('.ctrl-btn.min').onclick = () => {
     winEl.style.display = 'none';
@@ -237,7 +274,7 @@ function setupDrag(winEl) {
   });
 }
 
-// Masaüstü ve Başlat İkon Tıklamaları
+// Masaüstü ve Başlat İkon Tıklama Dinleyicisi
 document.addEventListener('click', (e) => {
   const icon = e.target.closest('.desktop-icon') || e.target.closest('.start-item');
   if (icon && icon.dataset.app) {
@@ -245,18 +282,16 @@ document.addEventListener('click', (e) => {
   }
 });
 
-document.getElementById('btn-restart').addEventListener('click', () => {
-  location.reload();
-});
+const restartBtn = document.getElementById('btn-restart');
+if (restartBtn) {
+  restartBtn.addEventListener('click', () => location.reload());
+}
 
-// ==========================================
-// 1. TERMINAL APP
-// ==========================================
 // ==========================================
 // 1. LINUX BASH TERMINAL (Virtual FS & Shell)
 // ==========================================
 function initTerminalApp(container) {
-  // Sanal Dosya Sistemi (In-Memory Virtual Linux Filesystem)
+  // Sanal Dosya Sistemi
   const vfs = {
     '/': { type: 'dir', children: ['home', 'bin', 'etc', 'var'] },
     '/home': { type: 'dir', children: ['mehmet'] },
@@ -274,36 +309,8 @@ function initTerminalApp(container) {
     },
     '/home/mehmet/Belgeler': { type: 'dir', children: ['sifreler.txt'] },
     '/home/mehmet/Belgeler/sifreler.txt': { type: 'file', content: 'SECRET_VAULT_KEY: 9482-cyber-linux-pass' },
-    '/home/mehmet/Masaustu': { type: 'dir', children: ['paketler.txt'] },\n    '/home/mehmet/Masaustu/paketler.txt': { type: 'file', content: `=================================================
-📦 CYBEROS LINUX - APT DEPOSU PAKET LİSTESİ
-=================================================
-Terminali açıp 'sudo apt install <paket-adi>' 
-yazarak aşağıdaki uygulamaları kurabilirsiniz:
-
-1. cmatrix
-   Açıklama: Efsanevi yeşil Matrix dijital yağmur akışı!
-   Komut:    sudo apt install cmatrix
-
-2. sl
-   Açıklama: Terminal ekranından geçen nostaljik buharlı tren!
-   Komut:    sudo apt install sl
-
-3. htop
-   Açıklama: Etkileşimli dinamik CPU & RAM işlem yöneticisi.
-   Komut:    sudo apt install htop
-
-4. cowsay
-   Açıklama: Konuşan sevimli terminal ineği!
-   Komut:    sudo apt install cowsay
-
-5. tetris
-   Açıklama: Masaüstüne mini retro Tetris oyunu yükler!
-   Komut:    sudo apt install tetris
-
-6. clock
-   Açıklama: Büyük dijital neon masaüstü saati.
-   Komut:    sudo apt install clock
-=================================================` },
+    '/home/mehmet/Masaustu': { type: 'dir', children: ['paketler.txt'] },
+    '/home/mehmet/Masaustu/paketler.txt': { type: 'file', content: PAKETLER_TXT },
     '/home/mehmet/Projeler': { type: 'dir', children: ['pixel-studio', 'sandbox-web'] },
     '/etc': { type: 'dir', children: ['os-release', 'hostname'] },
     '/etc/os-release': { 
@@ -311,7 +318,7 @@ yazarak aşağıdaki uygulamaları kurabilirsiniz:
       content: 'NAME="CyberOS GNU/Linux"\nVERSION="24.04 LTS"\nID=cyberos\nPRETTY_NAME="CyberOS 24.04 LTS (Noble Numbat)"' 
     },
     '/etc/hostname': { type: 'file', content: 'cyberos-desktop' },
-    '/bin': { type: 'dir', children: ['ls', 'cat', 'pwd', 'cd', 'mkdir', 'touch', 'rm', 'echo', 'uname', 'neofetch', 'whoami', 'clear', 'sudo', 'date'] },
+    '/bin': { type: 'dir', children: ['ls', 'cat', 'pwd', 'cd', 'mkdir', 'touch', 'rm', 'echo', 'uname', 'neofetch', 'whoami', 'clear', 'sudo', 'date', 'apt'] },
     '/var': { type: 'dir', children: ['log'] }
   };
 
@@ -355,7 +362,8 @@ Welcome to CyberOS Linux 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)
  * Memory usage:   24% of 16384MB
  * IP address:     192.168.0.131
 
-Type 'help' to view available Linux bash commands.</div>
+Type 'help' to view available Linux bash commands.
+Type 'cat ~/Masaustu/paketler.txt' to view installable software.</div>
       <div class="term-input-line">
         <span class="term-prompt" id="term-prompt">mehmet@cyberos-desktop:~$ </span>
         <input type="text" class="term-input" id="term-input" autofocus autocomplete="off" spellcheck="false">
@@ -528,9 +536,9 @@ Type 'help' to view available Linux bash commands.</div>
         } else {
           output.textContent += `\n${text}`;
         }
-      } else if (cmd === 'sudo') {
+      } else if (cmd === 'sudo' && args[1] !== 'apt') {
         output.textContent += '\n[sudo] password for mehmet: \nmehmet is in the sudoers file. This incident will be reported.';
-      
+      } 
       // --- APT PAKET YÖNETİCİSİ ---
       else if (cmd === 'apt' || (cmd === 'sudo' && args[1] === 'apt')) {
         const aptArgs = cmd === 'sudo' ? args.slice(2) : args.slice(1);
@@ -558,7 +566,7 @@ Type 'help' to view available Linux bash commands.</div>
               installedApps.add(pkg);
               vfs['/bin'].children.push(pkg);
 
-              // Masaüstüne ve Başlat Menüsüne yeni ikonu dinamik ekle
+              // Masaüstüne ve Başlat Menüsüne yeni ikonu ekle
               addAppToDesktop(pkg);
             }
           }
@@ -604,8 +612,6 @@ Type 'help' to view available Linux bash commands.</div>
           openApp('clock_app');
           output.textContent += '\n[Neon Saat başlatıldı...]';
         }
-      }
-
       } else if (cmd === 'neofetch') {
         output.textContent += `\n
         #####        mehmet@cyberos-desktop
@@ -624,6 +630,7 @@ QQQQQQQ#     #QQQQQ  Terminal: bash-in-browser
       } else if (cmd === 'help') {
         output.textContent += `\nGNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)
 Available Linux Commands:
+  sudo apt [install/update/list] - APT Paket Yöneticisi
   ls [-la]       - List directory contents
   cd [path]      - Change working directory (supports .. and ~)
   pwd            - Print name of current/working directory
@@ -649,6 +656,9 @@ Available Linux Commands:
   updatePrompt();
 }
 
+// ==========================================
+// 2. NOTEPAD APP
+// ==========================================
 function initNotepadApp(container) {
   const savedText = localStorage.getItem('cyberos_notepad') || 'CyberOS Not Defterine Hoş Geldiniz!\n\nBuraya aldığınız notlar tarayıcının yerel hafızasına (LocalStorage) anında kaydedilir.';
   container.innerHTML = `
@@ -743,7 +753,6 @@ function initPaintApp(container) {
   const pCtx = pCanvas.getContext('2d');
   const wrapper = container.querySelector('.paint-canvas-wrapper');
 
-  // Boyutlandırma
   setTimeout(() => {
     pCanvas.width = wrapper.clientWidth;
     pCanvas.height = wrapper.clientHeight;
@@ -808,56 +817,23 @@ function initSettingsApp(container) {
   });
 }
 
-// Varsayılan olarak başlangıçta Terminal'i aç
-openApp('terminal');
-
 // ==========================================
-// PAKETLER.TXT GÖRÜNTÜLEYİCİ
+// 6. PAKETLER.TXT GÖRÜNTÜLEYİCİ
 // ==========================================
 function initReadmeApp(container) {
-  const content = `=================================================
-📦 CYBEROS LINUX - APT DEPOSU PAKET LİSTESİ
-=================================================
-Terminali açıp 'sudo apt install <paket-adi>' 
-yazarak aşağıdaki uygulamaları kurabilirsiniz:
-
-1. cmatrix
-   Açıklama: Efsanevi yeşil Matrix dijital yağmur akışı!
-   Komut:    sudo apt install cmatrix
-
-2. sl
-   Açıklama: Terminal ekranından geçen nostaljik buharlı tren!
-   Komut:    sudo apt install sl
-
-3. htop
-   Açıklama: Etkileşimli dinamik CPU & RAM işlem yöneticisi.
-   Komut:    sudo apt install htop
-
-4. cowsay
-   Açıklama: Konuşan sevimli terminal ineği!
-   Komut:    sudo apt install cowsay
-
-5. tetris
-   Açıklama: Masaüstüne mini retro Tetris oyunu yükler!
-   Komut:    sudo apt install tetris
-
-6. clock
-   Açıklama: Büyük dijital neon masaüstü saati.
-   Komut:    sudo apt install clock
-=================================================`;
   container.innerHTML = `
-    <div style="height: 100%; display: flex; flex-direction: column; background: #181a26; color: #a29bfe; font-family: 'Fira Code', monospace; padding: 1rem; overflow-y: auto; font-size: 0.82rem; line-height: 1.5; white-space: pre-wrap; user-select: text;">${content}</div>
+    <div style="height: 100%; display: flex; flex-direction: column; background: #181a26; color: #a29bfe; font-family: 'Fira Code', monospace; padding: 1.2rem; overflow-y: auto; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; user-select: text;">${PAKETLER_TXT}</div>
   `;
 }
 
 // ==========================================
-// KURULAN UYGULAMALAR: TETRIS
+// 7. KURULAN UYGULAMA: TETRIS ARCADE
 // ==========================================
 function initTetrisApp(container) {
   container.innerHTML = `
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #0c0d14; color: #fff; gap: 10px;">
-      <div style="font-weight: 700; color: #ff4757; font-size: 1.1rem;">🕹️ Mini Tetris Arcade</div>
-      <canvas id="mini-tetris" width="160" height="240" style="background: #000; border: 2px solid #333;"></canvas>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #0c0d14; color: #fff; gap: 12px; padding: 10px;">
+      <div style="font-weight: 700; color: #ff4757; font-size: 1.1rem;">🕹️ Tetris Arcade</div>
+      <canvas id="mini-tetris" width="180" height="260" style="background: #000; border: 2px solid #333; border-radius: 6px;"></canvas>
       <div style="font-size: 0.75rem; color: #888;">Yön Tuşları: Hareket | Yukarı: Döndür</div>
     </div>
   `;
@@ -867,10 +843,12 @@ function initTetrisApp(container) {
   tCtx.fillRect(40, 60, 80, 20);
   tCtx.fillStyle = '#00d2d3';
   tCtx.fillRect(60, 40, 20, 20);
+  tCtx.fillStyle = '#ff4757';
+  tCtx.fillRect(100, 100, 40, 40);
 }
 
 // ==========================================
-// KURULAN UYGULAMALAR: NEON SAAT
+// 8. KURULAN UYGULAMA: NEON SAAT
 // ==========================================
 function initClockApp(container) {
   container.innerHTML = `
@@ -892,6 +870,7 @@ function initClockApp(container) {
   cEl.textContent = d.toTimeString().split(' ')[0];
 }
 
+// Masaüstüne Dinamik İkon Ekleme
 function addAppToDesktop(appName) {
   const dtIcons = document.querySelector('.desktop-icons');
   const startList = document.querySelector('.start-list');
@@ -906,25 +885,24 @@ function addAppToDesktop(appName) {
 
   if (!meta) return;
 
-  // Masaüstü ikonu
-  const iconDiv = document.createElement('div');
-  iconDiv.className = 'desktop-icon';
-  iconDiv.dataset.app = appName === 'clock' ? 'clock_app' : appName;
-  iconDiv.innerHTML = `<div class="icon-img">${meta.icon}</div><div class="icon-label">${meta.name}</div>`;
-  iconDiv.onclick = () => {
-    if (appName === 'tetris' || appName === 'clock') {
-      openApp(appName === 'clock' ? 'clock_app' : 'tetris');
-    } else {
-      openApp('terminal');
-    }
-  };
-  dtIcons.appendChild(iconDiv);
+  const targetAppId = (appName === 'clock') ? 'clock_app' : appName;
 
-  // Başlat Menüsü İkonu
-  const itemDiv = document.createElement('div');
-  itemDiv.className = 'start-item';
-  itemDiv.dataset.app = iconDiv.dataset.app;
-  itemDiv.innerHTML = `<span>${meta.icon}</span> ${meta.name}`;
-  itemDiv.onclick = iconDiv.onclick;
-  startList.appendChild(itemDiv);
+  if (dtIcons) {
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'desktop-icon';
+    iconDiv.dataset.app = targetAppId;
+    iconDiv.innerHTML = `<div class="icon-img">${meta.icon}</div><div class="icon-label">${meta.name}</div>`;
+    dtIcons.appendChild(iconDiv);
+  }
+
+  if (startList) {
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'start-item';
+    itemDiv.dataset.app = targetAppId;
+    itemDiv.innerHTML = `<span>${meta.icon}</span> ${meta.name}`;
+    startList.appendChild(itemDiv);
+  }
 }
+
+// Varsayılan olarak başlangıçta Terminal'i aç
+openApp('terminal');
