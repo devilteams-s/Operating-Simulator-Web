@@ -717,9 +717,15 @@ function initCalcApp(container) {
         screen.textContent = currentExpr || '0';
       } else if (v === '=') {
         try {
-          const res = Function(`'use strict'; return (${currentExpr})`)();
-          currentExpr = String(res);
-          screen.textContent = currentExpr;
+          // Güvenlik: Yalnızca rakamlar ve geçerli matematik operatörlerine izin ver
+          if (/^[0-9+\-*\/. ]+$/.test(currentExpr)) {
+            const res = Function(`'use strict'; return (${currentExpr})`)();
+            currentExpr = String(res);
+            screen.textContent = currentExpr;
+          } else {
+            screen.textContent = 'Hata';
+            currentExpr = '';
+          }
         } catch {
           screen.textContent = 'Hata';
           currentExpr = '';
